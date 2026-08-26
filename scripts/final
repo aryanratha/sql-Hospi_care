@@ -1,0 +1,79 @@
+-- ============================================================================
+-- PROJECT: Auto Care Hospital Discharge Analysis
+-- PURPOSE: Key Performance Indicators (KPIs) & Demographic Distributions
+-- ============================================================================
+
+-- Q1: Total Discharges
+-- Calculates the absolute volume of successfully discharged patients.
+SELECT 
+    COUNT(*) AS Total_Discharges
+FROM v_HospitalAdmission
+WHERE OUTCOME = 'DISCHARGE';
+
+
+-- Q2: Average Daily Discharge Rate (Optimized)
+-- Uses conditional aggregation to avoid expensive subqueries and calculates 
+-- the discharge rate as a percentage of total patient days.
+-- Added NULLIF to prevent potential divide-by-zero errors.
+SELECT
+    ROUND(
+        SUM(CASE WHEN OUTCOME = 'DISCHARGE' THEN 1.0 ELSE 0.0 END) / 
+        NULLIF(SUM(DURATION_OF_STAY), 0) * 100, 
+    2) AS Avg_Daily_Discharge_Rate
+FROM v_HospitalAdmission;
+	
+
+-- Q3: Average Length of Stay (ALOS)
+-- Measures the average number of days a discharged patient spends in the hospital.
+-- Simplified by using the built-in AVG() function instead of manual division.
+SELECT 
+    ROUND(AVG(CAST(DURATION_OF_STAY AS FLOAT)), 2) AS Avg_Length_Of_Stay
+FROM v_HospitalAdmission
+WHERE OUTCOME = 'DISCHARGE';
+
+
+-- Q4: Distribution of Discharges by Age Cohort
+-- Segments discharged patients into distinct clinical age groups.
+SELECT 
+    CASE 
+        WHEN AGE < 16 THEN 'Paediatric (<16)'
+        WHEN AGE >= 16 AND AGE < 65 THEN 'Adult (16-64)'
+        WHEN AGE >= 65 THEN 'Senior Citizen (65+)'
+        ELSE 'Unknown'
+    END AS Age_Cohort, 
+    COUNT(*) AS Patient_Volume
+FROM v_HospitalAdmission
+WHERE OUTCOME = 'DISCHARGE'
+GROUP BY 
+    CASE 
+        WHEN AGE < 16 THEN 'Paediatric (<16)'
+        WHEN AGE >= 16 AND AGE < 65 THEN 'Adult (16-64)'
+        WHEN AGE >= 65 THEN 'Senior Citizen (65+)'
+        ELSE 'Unknown'
+    END
+ORDER BY Patient_Volume DESC;
+
+
+-- Q5: Distribution of Discharges by Gender 
+-- Filters out NULL values to ensure clean demographic reporting.
+SELECT 
+    GENDER AS Patient_Gender, 
+    COUNT(*) AS Patient_Volume
+FROM v_HospitalAdmission
+WHERE OUTCOME = 'DISCHARGE' 
+  AND GENDER IS NOT NULL
+GROUP BY GENDER
+ORDER BY Patient_Volume DESC;
+
+
+-- Q6: Distribution of Discharges by Day of the Week
+-- Identifies peak discharge days to assist with hospital staff scheduling.
+-- Utilizes DATENAME for clear, full-text day outputs (e.g., 'Monday').
+SELECT 
+    DATENAME(WEEKDAY, D_O_D) AS Discharge_Day, 
+    COUNT(*) AS Total_Discharges
+FROM v_HospitalAdmission
+WHERE OUTCOME = 'DISCHARGE' 
+  AND D_O_D IS NOT NULL
+GROUP BY DATENAME(WEEKDAY, D_O_D)
+ORDER BY Total_Discharges DESC;
