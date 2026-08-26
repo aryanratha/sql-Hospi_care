@@ -1,0 +1,24 @@
+-- Set the context to the correct Database
+USE HOSPITALDWH;
+GO
+
+-- Create a view to store the cleaned, deduplicated patient data
+CREATE OR ALTER VIEW v_HospitalAdmission AS
+
+-- Use a Common Table Expression (CTE) to identify duplicate records
+WITH CleanData AS (
+    SELECT 
+        *, 
+        -- Assign a row number to partition duplicates based on Patient ID and Dates
+        ROW_NUMBER() OVER(
+            PARTITION BY MRD_No, D_O_A, D_O_D 
+            ORDER BY MRD_No
+        ) AS Dup_No
+    FROM Admissiondata
+)
+
+-- Select only the first unique instance and filter out null Patient IDs
+SELECT *
+FROM CleanData
+WHERE Dup_No = 1 
+  AND MRD_No IS NOT NULL;
