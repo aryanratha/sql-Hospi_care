@@ -1,0 +1,13 @@
+The following questions were answered by analyzing the data from the hospital csv file using sql
+
+Q1 . Overall Patient Volume: What is the total number of patient discharges recorded over the two-year study period?
+
+Q2. Operational Throughput: What is the average daily discharge rate, and how does this baseline help predict daily hospital bed availability?
+
+Q3. Hospital Efficiency (ALOS): What is the Average Length of Stay (ALOS) for patients from admission to discharge?
+
+Q4. Demographic Segmentation (Age): How are patient discharges distributed across different age cohorts, and which age groups constitute the highest hospital volume?
+
+Q5. Demographic Segmentation (Gender): What is the gender distribution among discharged patients, and are there notable differences in admission volumes?
+
+Q6. Workflow & Staffing Optimization: How do discharge volumes fluctuate by the day of the week, and which days experience the highest administrative bottlenecks?
